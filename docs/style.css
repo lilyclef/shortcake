@@ -1,0 +1,9 @@
+body {
+  font-family: "Hachi Maru Pop";
+  color: #797979;
+  text-align: center;
+  background-color: aliceblue;
+}
+canvas {
+  display: none !important;
+ }

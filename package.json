@@ -1,6 +1,6 @@
 {
   "author": "Yuri Yamamoto <allabrevec@gmail.com>",
-  "name": "today's graph like a shortcake",
+  "name": "shortcake",
   "version": "0.1.0",
   "scripts": {
     "predeploy": "npm run build",
