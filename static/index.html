@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <!-- Basic Page Needs
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta charset="UTF-8">
+  <title>今日の一日ぐらふ</title>
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!-- Mobile Specific Metas
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- FONT
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hachi+Maru+Pop&display=swap" rel="stylesheet">
+
+  <!-- CSS
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="stylesheet" href="normalize.css">
+  <link rel="stylesheet" href="skeleton.css">
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Favicon
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="icon" type="image/png" href="images/favicon.png">
+
+</head>
+
+<body>
+  <div class="container">
+
+    <div class="row">
+      <h1>今日はこんな感じ！</h1>
+    </div>
+
+    <div class="row">
+      <canvas id="canvas" width="500px" height="500px"></canvas>
+      <img id="img">
+    </div>
+
+    <div class="row">
+      <a href="https://twitter.com/share?ref_src=twsrc%5Etfw" class="twitter-share-button" data-hashtags="一日ぐらふ"
+        data-show-count="false">Tweet</a>
+      <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+    </div>
+
+    <!-- The above form looks like this -->
+    <form>
+
+      <div class="row">
+        <div class="two columns">
+          <label for="input_hour_00">0:00〜</label>
+          <input class="u-full-width" type="text" placeholder="" id="input_hour_00">
+        </div>
+        <div class="two columns">
+          <label for="input_hour_01">1:00〜</label>
+          <input class="u-full-width" type="text" placeholder="" id="input_hour_01">
+        </div>
+        <div class="two columns">
+          <label for="input_hour_02">2:00〜</label>
+          <input class="u-full-width" type="text" placeholder="" id="input_hour_02">
+        </div>
+        <div class="two columns">
+          <label for="input_hour_03">3:00〜</label>
+          <input class="u-full-width" type="text" placeholder="" id="input_hour_03">
+        </div>
+        <div class="two columns">
+          <label for="input_hour_04">4:00〜</label>
+          <input class="u-full-width" type="text" placeholder="" id="input_hour_04">
+        </div>
+        <div class="two columns">
+          <label for="input_hour_05">5:00〜</label>
+          <input class="u-full-width" type="text" placeholder="" id="input_hour_05">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="two columns">
+          <label for="input_hour_06">6:00〜</label>
+          <input class="u-full-width" type="text" placeholder="" id="input_hour_06">
+        </div>
+        <div class="two columns">
+          <label for="input_hour_07">7:00〜</label>
+          <input class="u-full-width" type="text" placeholder="" id="input_hour_07">
+        </div>
+        <div class="two columns">
+          <label for="input_hour_08">8:00〜</label>
+          <input class="u-full-width" type="text" placeholder="" id="input_hour_08">
+        </div>
+        <div class="two columns">
+          <label for="input_hour_09">9:00〜</label>
+          <input class="u-full-width" type="text" placeholder="" id="input_hour_09">
+        </div>
+        <div class="two columns">
+          <label for="input_hour_10">10:00〜</label>
+          <input class="u-full-width" type="text" placeholder="" id="input_hour_10">
+        </div>
+        <div class="two columns">
+          <label for="input_hour_11">11:00〜</label>
+          <input class="u-full-width" type="text" placeholder="" id="input_hour_11">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="two columns">
+          <label for="input_hour_12">12:00〜</label>
+          <input class="u-full-width" type="text" placeholder="" id="input_hour_12">
+        </div>
+        <div class="two columns">
+          <label for="input_hour_13">13:00〜</label>
+          <input class="u-full-width" type="text" placeholder="" id="input_hour_13">
+        </div>
+        <div class="two columns">
+          <label for="input_hour_14">14:00〜</label>
+          <input class="u-full-width" type="text" placeholder="" id="input_hour_14">
+        </div>
+        <div class="two columns">
+          <label for="input_hour_15">15:00〜</label>
+          <input class="u-full-width" type="text" placeholder="" id="input_hour_15">
+        </div>
+        <div class="two columns">
+          <label for="input_hour_16">16:00〜</label>
+          <input class="u-full-width" type="text" placeholder="" id="input_hour_16">
+        </div>
+        <div class="two columns">
+          <label for="input_hour_17">17:00〜</label>
+          <input class="u-full-width" type="text" placeholder="" id="input_hour_17">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="two columns">
+          <label for="input_hour_18">18:00〜</label>
+          <input class="u-full-width" type="text" placeholder="" id="input_hour_18">
+        </div>
+
+        <div class="two columns">
+          <label for="input_hour_19">19:00〜</label>
+          <input class="u-full-width" type="text" placeholder="" id="input_hour_19">
+        </div>
+        <div class="two columns">
+          <label for="input_hour_20">20:00〜</label>
+          <input class="u-full-width" type="text" placeholder="" id="input_hour_20">
+        </div>
+        <div class="two columns">
+          <label for="input_hour_21">21:00〜</label>
+          <input class="u-full-width" type="text" placeholder="" id="input_hour_21">
+        </div>
+        <div class="two columns">
+          <label for="input_hour_22">22:00〜</label>
+          <input class="u-full-width" type="text" placeholder="" id="input_hour_22">
+        </div>
+        <div class="two columns">
+          <label for="input_hour_23">23:00〜</label>
+          <input class="u-full-width" type="text" placeholder="" id="input_hour_23">
+        </div>
+      </div>
+      <!---
+        <div class="three columns">
+          <label for="exampleRecipientInput">テーマ</label>
+          <select class="u-full-width" id="exampleRecipientInput">
+            <option value="Option 1">default</option>
+          </select>
+        </div>-->
+  </div>
+  <!--<label class="example-send-yourself-copy">
+        <input type="checkbox">
+        <span class="label-body">目盛りを付けない</span>
+      </label>-->
+  <input id="input_start" class="button-primary" type="button" value="画像を作る">
+  </form>
+
+  <!-- Always wrap checkbox and radio inputs in a label and use a <span class="label-body"> inside of it -->
+  <!-- Note: The class .u-full-width is just a utility class shorthand for width: 100% -->
+  </div>
+
+  <script src="index.js"></script>
+</body>
+
+</html>
