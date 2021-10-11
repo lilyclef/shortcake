@@ -1,7 +1,7 @@
 use std::f64::consts::PI;
-use wasm_bindgen::prelude::*;
-use wasm_bindgen::JsCast;
-use web_sys::HtmlCanvasElement;
+
+use wasm_bindgen::{prelude::*, JsCast};
+use web_sys::{HtmlCanvasElement, HtmlElement, HtmlImageElement, HtmlInputElement};
 
 // When the `wee_alloc` feature is enabled, this uses `wee_alloc` as the global
 // allocator.
@@ -20,7 +20,10 @@ fn get_arc(u: usize) -> f64 {
 }
 
 fn fill_circle(context: &web_sys::CanvasRenderingContext2d, ci: usize, from: usize, to: usize) {
-    let color_list = ["#B5EAEA", "#EDF6E5", "#FFBCBC", "#F38BA0"];
+    let color_list = [
+        "#9AD3BC", "#EDF6E5", "#FFBCBC", "#F38BA0", "#B5EAEA", "#87A8A4",
+    ];
+    let ci = ci % color_list.len();
     context.begin_path();
     context.move_to(250.0, 250.0);
     context.set_fill_style(&color_list[ci].into());
@@ -41,12 +44,11 @@ fn set_text(
     context.set_font("30px Hachi Maru Pop");
     let color_letters = "#797979";
     context.set_fill_style(&color_letters.into());
-    let mut x = (scale_lst[from].1 + scale_lst[to].1 + 250.0 + scale_lst[(from + to) / 2].1) / 4.0;
-    let mut y = (scale_lst[from].2 + scale_lst[to].2 + 250.0 + scale_lst[(from + to) / 2].2) / 4.0;
-    if to - from >= 12 {
-        x = 500.0 - x;
-        y = 500.0 - y;
-    };
+    let from_to = ((from + to) / 2) % 24;
+    let from = from % 24;
+    let to = to % 24;
+    let x = (scale_lst[from].1 + scale_lst[to].1 + 250.0 + scale_lst[from_to].1) / 4.0;
+    let y = (scale_lst[from].2 + scale_lst[to].2 + 250.0 + scale_lst[from_to].2) / 4.0;
     context.fill_text(&text, x, y).unwrap();
 }
 
@@ -78,13 +80,8 @@ fn set_line(context: &web_sys::CanvasRenderingContext2d, color_letters: &str) {
     context.stroke();
 }
 
-fn convert_img(document: &web_sys::Document, canvas: HtmlCanvasElement) {
+fn convert_img(img: &HtmlImageElement, canvas: &HtmlCanvasElement) {
     let canvas_url = canvas.to_data_url().unwrap();
-    let img = document
-        .get_element_by_id("img")
-        .unwrap()
-        .dyn_into::<web_sys::HtmlImageElement>()
-        .unwrap();
     img.set_src(&canvas_url);
 }
 
@@ -97,20 +94,12 @@ fn set_sign(context: &web_sys::CanvasRenderingContext2d, color: &str) {
     context.fill_text("@lilybrevec", 390.0, 480.0).unwrap();
 }
 
-pub fn set_img(document: &web_sys::Document, data: &Vec<(&str, usize, usize)>) {
-    let canvas = document.get_element_by_id("canvas").unwrap();
-    let canvas: web_sys::HtmlCanvasElement = canvas
-        .dyn_into::<web_sys::HtmlCanvasElement>()
-        .map_err(|_| ())
-        .unwrap();
-
-    let context = canvas
-        .get_context("2d")
-        .unwrap()
-        .unwrap()
-        .dyn_into::<web_sys::CanvasRenderingContext2d>()
-        .unwrap();
-
+fn set_img(
+    context: &web_sys::CanvasRenderingContext2d,
+    img: &HtmlImageElement,
+    canvas: &HtmlCanvasElement,
+    data: &Vec<(String, usize, usize)>,
+) {
     let scale_lst = vec![
         ("0", 244.0, 42.0),
         ("1", 299.0, 50.0),
@@ -138,43 +127,91 @@ pub fn set_img(document: &web_sys::Document, data: &Vec<(&str, usize, usize)>) {
         ("23", 190.0, 48.0),
     ];
 
-    // Test cases
     fill_circle(&context, 0, 0, 24);
     let mut i = 1;
     data.into_iter().for_each(|item| {
-        fill_circle(&context, i % 4, item.1, item.2);
+        let ci = if i == data.len() - 1 { 0 } else { i };
+        fill_circle(&context, ci, item.1, item.2);
         i += 1;
     });
     data.into_iter().for_each(|item| {
-        set_text(&context, &scale_lst, item.0, item.1, item.2);
+        set_text(&context, &scale_lst, &item.0, item.1, item.2);
     });
 
     let color_letters = "#797979";
     set_sign(&context, &color_letters);
     set_scale(&context, &scale_lst, &color_letters);
     //set_line(&context, &color_letters);
-    convert_img(document, canvas);
+
+    convert_img(img, canvas);
 }
 
-pub fn start() {
-    let document: web_sys::Document = web_sys::window().unwrap().document().unwrap();
+pub fn start(document: &web_sys::Document) {
     let test_data = vec![
-        ("睡眠", 2, 9),
-        ("お仕事", 9, 18),
-        ("Rust", 18, 20),
-        ("生活", 20, 23),
+        ("睡眠".to_string(), 2, 9),
+        ("お仕事".to_string(), 9, 18),
+        ("Rust".to_string(), 18, 20),
+        ("生活".to_string(), 20, 26),
     ];
-    set_img(&document, &test_data);
-    // https://rustwasm.github.io/wasm-bindgen/examples/closures.html
-    // set_onclickを設定したいがうまく行っていないの図
-    /* let a = Closure::wrap(Box::new(move || {
+    let canvas = document.get_element_by_id("canvas").unwrap();
+    let canvas: web_sys::HtmlCanvasElement = canvas
+        .dyn_into::<web_sys::HtmlCanvasElement>()
+        .map_err(|_| ())
+        .unwrap();
+    let img = document
+        .get_element_by_id("img")
+        .unwrap()
+        .dyn_into::<web_sys::HtmlImageElement>()
+        .unwrap();
+    let context = canvas
+        .get_context("2d")
+        .unwrap()
+        .unwrap()
+        .dyn_into::<web_sys::CanvasRenderingContext2d>()
+        .unwrap();
+    set_img(&context, &img, &canvas, &test_data);
+    let document_cloned = document.clone();
+    let a = Closure::wrap(Box::new(move || {
+        context.clear_rect(0.0, 0.0, 500.0, 500.0);
+        let mut data: Vec<(String, usize, usize)> = Vec::new();
+        let mut before_str = String::new();
+        let mut before_hour = 0;
+        let mut input_val: String;
+        let mut first_hour = 0;
+        let mut first = true;
+        for i in 0..23 {
+            let input_id = &format!("input_hour_{}", i);
+            input_val = document_cloned
+                .get_element_by_id(input_id)
+                .unwrap()
+                .dyn_into::<HtmlInputElement>()
+                .unwrap()
+                .value();
+            if !input_val.is_empty() {
+                if !before_str.is_empty() {
+                    data.push((before_str, before_hour, i));
+                }
+                if first {
+                    first_hour = i;
+                    first = false;
+                }
+                before_hour = i;
+                before_str = input_val.to_string();
+            }
+        }
+        if !before_str.is_empty() {
+            data.push((before_str, before_hour, first_hour+24));
+        }
+        set_img(&context, &img, &canvas, &data);
     }) as Box<dyn FnMut()>);
-    let input =  document.get_element_by_id("input-start")
-      .expect("should have #input-start on the page")
-      .dyn_ref::<HtmlElement>()
-      .expect("#input-start be an `HtmlElement`");
-     input.set_onclick(Some(a.as_ref().unchecked_ref()));
-     */
+
+    document
+        .get_element_by_id("input_start")
+        .expect("should have #input_start on the page")
+        .dyn_ref::<HtmlElement>()
+        .expect("#input_start be an `HtmlElement`")
+        .set_onclick(Some(a.as_ref().unchecked_ref()));
+    a.forget();
 }
 
 // This is like the `main` function, except for JavaScript.
@@ -184,6 +221,8 @@ pub fn main_js() -> Result<(), JsValue> {
     // It's disabled in release mode so it doesn't bloat up the file size.
     #[cfg(debug_assertions)]
     console_error_panic_hook::set_once();
-    start();
+
+    let document: web_sys::Document = web_sys::window().unwrap().document().unwrap();
+    start(&document);
     Ok(())
 }

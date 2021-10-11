@@ -1,7 +1,6 @@
 # [shortcake](https://lilybrevec.github.io/shortcake/)
 - Show your ONE DAY graph like a cake🍰
 - [Rust🦀 + wasm🕸️ = 💖🍰💖](https://github.com/rustwasm)
-- Underconstruction (作りかけ🍳)
 
 ## How to install
 
