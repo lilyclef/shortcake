@@ -19,7 +19,12 @@ fn get_arc(u: usize) -> f64 {
     }
 }
 
-fn fill_circle(context: &web_sys::CanvasRenderingContext2d, ci: usize, from: usize, to: usize) {
+fn fill_circle(
+    context: &web_sys::CanvasRenderingContext2d,
+    ci: usize,
+    from: usize,
+    to: usize,
+) -> Result<(), JsValue> {
     let color_list = [
         "#9AD3BC", "#EDF6E5", "#FFBCBC", "#F38BA0", "#B5EAEA", "#87A8A4",
     ];
@@ -32,6 +37,7 @@ fn fill_circle(context: &web_sys::CanvasRenderingContext2d, ci: usize, from: usi
         .unwrap();
     context.close_path();
     context.fill();
+    Ok(())
 }
 
 fn set_text(
@@ -40,7 +46,7 @@ fn set_text(
     text: &str,
     from: usize,
     to: usize,
-) {
+) -> Result<(), JsValue> {
     context.set_font("30px Hachi Maru Pop");
     let color_letters = "#797979";
     context.set_fill_style(&color_letters.into());
@@ -50,13 +56,14 @@ fn set_text(
     let x = (scale_lst[from].1 + scale_lst[to].1 + 250.0 + scale_lst[from_to].1) / 4.0;
     let y = (scale_lst[from].2 + scale_lst[to].2 + 250.0 + scale_lst[from_to].2) / 4.0;
     context.fill_text(&text, x, y).unwrap();
+    Ok(())
 }
 
 fn set_scale(
     context: &web_sys::CanvasRenderingContext2d,
     scale_lst: &Vec<(&str, f64, f64)>,
     color: &str,
-) {
+) -> Result<(), JsValue> {
     context.set_fill_style(&color.into());
     scale_lst.into_iter().for_each(|item| {
         let font = if ["0", "6", "12", "18"].contains(&item.0) {
@@ -67,10 +74,14 @@ fn set_scale(
         context.set_font(font);
         context.fill_text(item.0, item.1, item.2).unwrap()
     });
+    Ok(())
 }
 
 #[allow(dead_code)]
-fn set_line(context: &web_sys::CanvasRenderingContext2d, color_letters: &str) {
+fn set_line(
+    context: &web_sys::CanvasRenderingContext2d,
+    color_letters: &str,
+) -> Result<(), JsValue> {
     context.begin_path();
     context.set_stroke_style(&color_letters.into());
     context.move_to(250.0, 0.0);
@@ -78,28 +89,25 @@ fn set_line(context: &web_sys::CanvasRenderingContext2d, color_letters: &str) {
     context.move_to(0.0, 250.0);
     context.line_to(500.0, 250.0);
     context.stroke();
+    Ok(())
 }
 
-fn convert_img(img: &HtmlImageElement, canvas: &HtmlCanvasElement) {
+fn convert_img(img: &HtmlImageElement, canvas: &HtmlCanvasElement) -> Result<(), JsValue> {
     let canvas_url = canvas.to_data_url().unwrap();
     img.set_src(&canvas_url);
+    Ok(())
 }
 
-fn set_sign(context: &web_sys::CanvasRenderingContext2d, color: &str) {
+fn set_sign(context: &web_sys::CanvasRenderingContext2d, color: &str) -> Result<(), JsValue> {
     context.set_font("8px Hachi Maru Pop");
     context.set_fill_style(&color.into());
-    context
-        .fill_text("#今日の一日ぐらふ", 390.0, 460.0)
-        .unwrap();
-    context.fill_text("@lilybrevec", 390.0, 480.0).unwrap();
+    context.fill_text("#今日の一日ぐらふ", 390.0, 460.0)
 }
 
 fn set_img(
     context: &web_sys::CanvasRenderingContext2d,
-    img: &HtmlImageElement,
-    canvas: &HtmlCanvasElement,
     data: &Vec<(String, usize, usize)>,
-) {
+) -> Result<(), JsValue> {
     let scale_lst = vec![
         ("0", 244.0, 42.0),
         ("1", 299.0, 50.0),
@@ -127,26 +135,25 @@ fn set_img(
         ("23", 190.0, 48.0),
     ];
 
-    fill_circle(&context, 0, 0, 24);
+    fill_circle(&context, 0, 0, 24).expect("Err first fill_circle");
     let mut i = 1;
     data.into_iter().for_each(|item| {
         let ci = if i == data.len() - 1 { 0 } else { i };
-        fill_circle(&context, ci, item.1, item.2);
+        fill_circle(&context, ci, item.1, item.2).expect("Err each Fill_circle");
         i += 1;
     });
     data.into_iter().for_each(|item| {
-        set_text(&context, &scale_lst, &item.0, item.1, item.2);
+        set_text(&context, &scale_lst, &item.0, item.1, item.2).expect("Err each set_text");
     });
 
     let color_letters = "#797979";
-    set_sign(&context, &color_letters);
-    set_scale(&context, &scale_lst, &color_letters);
+    set_sign(&context, &color_letters).expect("Err set_sign");
+    set_scale(&context, &scale_lst, &color_letters).expect("Err set_scale");
     //set_line(&context, &color_letters);
-
-    convert_img(img, canvas);
+    Ok(())
 }
 
-pub fn start(document: &web_sys::Document) {
+pub fn start(document: &web_sys::Document) -> Result<(), JsValue> {
     let test_data = vec![
         ("睡眠".to_string(), 2, 9),
         ("お仕事".to_string(), 9, 18),
@@ -169,9 +176,12 @@ pub fn start(document: &web_sys::Document) {
         .unwrap()
         .dyn_into::<web_sys::CanvasRenderingContext2d>()
         .unwrap();
-    set_img(&context, &img, &canvas, &test_data);
+    set_img(&context, &test_data)
+        .and_then(|_| convert_img(&img, &canvas))
+        .unwrap();
+
     let document_cloned = document.clone();
-    let a = Closure::wrap(Box::new(move || {
+    let closure = Closure::wrap(Box::new(move || {
         context.clear_rect(0.0, 0.0, 500.0, 500.0);
         let mut data: Vec<(String, usize, usize)> = Vec::new();
         let mut before_str = String::new();
@@ -179,7 +189,7 @@ pub fn start(document: &web_sys::Document) {
         let mut input_val: String;
         let mut first_hour = 0;
         let mut first = true;
-        for i in 0..23 {
+        for i in 0..24 {
             let input_id = &format!("input_hour_{}", i);
             input_val = document_cloned
                 .get_element_by_id(input_id)
@@ -200,9 +210,11 @@ pub fn start(document: &web_sys::Document) {
             }
         }
         if !before_str.is_empty() {
-            data.push((before_str, before_hour, first_hour+24));
+            data.push((before_str, before_hour, first_hour + 24));
         }
-        set_img(&context, &img, &canvas, &data);
+        set_img(&context, &data)
+            .and_then(|_| convert_img(&img, &canvas))
+            .unwrap();
     }) as Box<dyn FnMut()>);
 
     document
@@ -210,8 +222,9 @@ pub fn start(document: &web_sys::Document) {
         .expect("should have #input_start on the page")
         .dyn_ref::<HtmlElement>()
         .expect("#input_start be an `HtmlElement`")
-        .set_onclick(Some(a.as_ref().unchecked_ref()));
-    a.forget();
+        .set_onclick(Some(closure.as_ref().unchecked_ref()));
+    closure.forget();
+    Ok(())
 }
 
 // This is like the `main` function, except for JavaScript.
@@ -223,6 +236,6 @@ pub fn main_js() -> Result<(), JsValue> {
     console_error_panic_hook::set_once();
 
     let document: web_sys::Document = web_sys::window().unwrap().document().unwrap();
-    start(&document);
+    start(&document).unwrap();
     Ok(())
 }

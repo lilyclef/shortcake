@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "scripts": {
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build",
+    "deploy": "gh-pages -d docs",
     "build": "rimraf docs pkg && webpack",
     "start": "rimraf docs pkg && webpack-dev-server --open -d",
     "test": "cargo test && wasm-pack test --headless"
