@@ -19,14 +19,14 @@ fn get_arc(u: usize) -> f64 {
     }
 }
 
-fn fill_circle(
+fn set_circle(
     context: &web_sys::CanvasRenderingContext2d,
     ci: usize,
     from: usize,
     to: usize,
 ) -> Result<(), JsValue> {
     let color_list = [
-        "#9AD3BC", "#EDF6E5", "#FFBCBC", "#F38BA0", "#B5EAEA", "#87A8A4",
+        "#9AD3BC", "#EDF6E5", "#FFBCBC", "#F38BA0", "#B5EAEA", "#87A8A4", "#CAB8FF", "#FCFFA6"
     ];
     let ci = ci % color_list.len();
     context.begin_path();
@@ -92,12 +92,6 @@ fn set_line(
     Ok(())
 }
 
-fn convert_img(img: &HtmlImageElement, canvas: &HtmlCanvasElement) -> Result<(), JsValue> {
-    let canvas_url = canvas.to_data_url().unwrap();
-    img.set_src(&canvas_url);
-    Ok(())
-}
-
 fn set_sign(context: &web_sys::CanvasRenderingContext2d, color: &str) -> Result<(), JsValue> {
     context.set_font("8px Hachi Maru Pop");
     context.set_fill_style(&color.into());
@@ -135,11 +129,11 @@ fn set_img(
         ("23", 190.0, 48.0),
     ];
 
-    fill_circle(&context, 0, 0, 24).expect("Err first fill_circle");
+    set_circle(&context, 0, 0, 24).expect("Err first set_circle");
     let mut i = 1;
     data.into_iter().for_each(|item| {
         let ci = if i == data.len() - 1 { 0 } else { i };
-        fill_circle(&context, ci, item.1, item.2).expect("Err each Fill_circle");
+        set_circle(&context, ci, item.1, item.2).expect("Err each set_circle");
         i += 1;
     });
     data.into_iter().for_each(|item| {
@@ -151,6 +145,12 @@ fn set_img(
     set_scale(&context, &scale_lst, &color_letters).expect("Err set_scale");
     //set_line(&context, &color_letters);
     Ok(())
+}
+
+fn convert_img(img: &HtmlImageElement, canvas: &HtmlCanvasElement) -> Result<(), JsValue> {
+  let canvas_url = canvas.to_data_url().unwrap();
+  img.set_src(&canvas_url);
+  Ok(())
 }
 
 pub fn start(document: &web_sys::Document) -> Result<(), JsValue> {
@@ -176,6 +176,7 @@ pub fn start(document: &web_sys::Document) -> Result<(), JsValue> {
         .unwrap()
         .dyn_into::<web_sys::CanvasRenderingContext2d>()
         .unwrap();
+
     set_img(&context, &test_data)
         .and_then(|_| convert_img(&img, &canvas))
         .unwrap();
@@ -236,6 +237,5 @@ pub fn main_js() -> Result<(), JsValue> {
     console_error_panic_hook::set_once();
 
     let document: web_sys::Document = web_sys::window().unwrap().document().unwrap();
-    start(&document).unwrap();
-    Ok(())
+    start(&document)
 }
